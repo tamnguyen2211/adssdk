@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">AndroidAdsSdk</string>
+
+    <string name="content_vod"><![CDATA[http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4]]></string>
+
+    <string name="content_live_1"><![CDATA[https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8]]></string>
+
+    <string name="ad_tag_url"><![CDATA[https://d7.adsplay.xyz/delivery?uuid=e967fde34f114a7e9fc7196d4a5c7798&placement=102&referrer=https%3A%2F%2Fdev.fptplay.net%2Fdanh-muc%2F55701c1517dc1321ee85857a%2Fphim-bo.html&url=https%3A%2F%2Fdev.fptplay.net%2Fxem-video%2Fhua-voi-em-phu-sinh-nhuoc-mong-5b8f47cf558320099cf58d11.html&cxt=H%E1%BB%A9a%20V%E1%BB%9Bi%20Em%20Ph%C3%B9%20Sinh%20Nh%C6%B0%E1%BB%A3c%20M%E1%BB%99ng%20-%20Letting%20You%20Float%20Like%20A%20Dream&cxkw=Phim%20b%E1%BB%99%20hot%2CHoa%20ng%E1%BB%AF&ut=0&cid=5b8f47cf558320099cf58d11&loc=vn-south&t=1543392488607&at=tvc]]></string>
+
+</resources>
+

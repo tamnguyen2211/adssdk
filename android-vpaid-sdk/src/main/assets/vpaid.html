@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IMA HTML5 Simple Demo</title>
+    <link rel="stylesheet" type="text/css" href="vpaid-style.css">
+    <script type="text/javascript" src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+    <script type="text/javascript" src="vpaid-js.js"></script>
+</head>
+
+<body onload="initDesktopAutoplay()">
+<div id="mainContainer">
+    <div id="content">
+        <video id="playerVpaid" playsinline>
+            <source src="https://ads-cdn.fptplay.net/static/videos/2018/07/6e4fdc4a0cf7aa195a12d5aeca913360_2355.MP4"
+                    type="video/mp4"/>
+        </video>
+    </div>
+    <div id="adContainer"></div>
+</div>
+<button id="playButton">Play</button>
+</body>
+</html>
