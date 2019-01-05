@@ -47,6 +47,34 @@ public class VmapParser {
         return null;
     }
 
+    public static Integer getSkipOffSet(String vastResponse){
+        try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            InputStream stream = new ByteArrayInputStream(vastResponse.getBytes(Charset.forName("UTF-8")));
+            Document document = documentBuilder.parse(stream);
+            document.getDocumentElement().normalize();
+            NodeList nodeSkipOffsetList = document.getElementsByTagName("Linear");
+            int skipOffset = 0;
+            for (int i = 0; i < nodeSkipOffsetList.getLength(); i++) {
+                Node nodeSkipOffset = nodeSkipOffsetList.item(i);
+                if (nodeSkipOffset.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) nodeSkipOffset;
+                    if (element.hasAttribute("skipoffset")) {
+                        String[] time = element.getAttribute("skipoffset").split(":");
+                        skipOffset = (Integer.parseInt(time[2])) + (60 * Integer.parseInt(time[1])) + (3600 * Integer.parseInt(time[0]));
+                        break;
+                    } else {
+                        skipOffset = 0;
+                    }
+                }
+            }
+            return skipOffset;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     public static Map<Long, Map<Integer, String>> getListVast(String vastResponse) {
         Map<Long, Map<Integer, String>> listVast = new HashMap<>();
         List<Long> vastOffset = new ArrayList<>();

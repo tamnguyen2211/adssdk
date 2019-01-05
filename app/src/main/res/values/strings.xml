@@ -5,7 +5,11 @@
 
     <string name="content_live_1"><![CDATA[https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8]]></string>
 
-    <string name="ad_tag_url"><![CDATA[https://d7.adsplay.xyz/delivery?uuid=e967fde34f114a7e9fc7196d4a5c7798&placement=102&referrer=https%3A%2F%2Fdev.fptplay.net%2Fdanh-muc%2F55701c1517dc1321ee85857a%2Fphim-bo.html&url=https%3A%2F%2Fdev.fptplay.net%2Fxem-video%2Fhua-voi-em-phu-sinh-nhuoc-mong-5b8f47cf558320099cf58d11.html&cxt=H%E1%BB%A9a%20V%E1%BB%9Bi%20Em%20Ph%C3%B9%20Sinh%20Nh%C6%B0%E1%BB%A3c%20M%E1%BB%99ng%20-%20Letting%20You%20Float%20Like%20A%20Dream&cxkw=Phim%20b%E1%BB%99%20hot%2CHoa%20ng%E1%BB%AF&ut=0&cid=5b8f47cf558320099cf58d11&loc=vn-south&t=1543392488607&at=tvc]]></string>
+    <string name="content_live_yt"><![CDATA[https://manifest.googlevideo.com/api/manifest/hls_playlist/id/bCkyP41YVIE.1/itag/95/source/yt_live_broadcast/requiressl/yes/ratebypass/yes/live/1/cmbypass/yes/goi/160/sgoap/gir%3Dyes%3Bitag%3D140/sgovp/gir%3Dyes%3Bitag%3D136/hls_chunk_host/r1---sn-42u-nboe.googlevideo.com/playlist_type/DVR/ei/9SowXOC8NsS9qQHW0L7YDQ/gcr/vn/mm/32/mn/sn-42u-nboe/ms/lv/mv/u/pl/24/dover/11/keepalive/yes/mt/1546659561/disable_polymer/true/ip/210.245.103.189/ipbits/0/expire/1546682198/sparams/ip,ipbits,expire,id,itag,source,requiressl,ratebypass,live,cmbypass,goi,sgoap,sgovp,hls_chunk_host,playlist_type,ei,gcr,mm,mn,ms,mv,pl/signature/844094B8195CA9243246EDF994029EBA75E015F7.03217D62D821E4298B7B5510D0C786C765009F3E/key/dg_yt0/playlist/index.m3u8]]></string>
+
+    <string name="ad_tag_url"><![CDATA[https://d.adsplay.net/delivery?uuid=897fcb2a27d84ca0abd0571889e8e39b&placement=308&referrer=https%3A%2F%2Ffptplay.vn%2F&url=https%3A%2F%2Ffptplay.vn%2Fxem-video%2Fbau-troi-tinh-yeu-sky-of-love-5acd6f4f5583200884530a55.html%23tap-1%2Fs%2F1%2Fk%2Fb%25E1%25BA%25A7u%2520tr%25E1%25BB%259Di%2Fsug&cxt=B%E1%BA%A7u%20Tr%E1%BB%9Di%20T%C3%ACnh%20Y%C3%AAu%20-%20Sky%20Of%20Love&cxkw=N%E1%BB%95i%20b%E1%BA%ADt%2CH%C3%A0i%20h%C6%B0%E1%BB%9Bc%2CT%C3%A2m%20l%C3%BD&ut=0&cid=5acd6f4f5583200884530a55&loc=vn-south&t=1543997728065&at=tvc]]></string>
+
+    <string name="ad_tag_url_google"><![CDATA[https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinearvpaid2js&correlator=]]></string>
 
 </resources>
 

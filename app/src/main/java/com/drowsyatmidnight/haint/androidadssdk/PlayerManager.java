@@ -2,9 +2,15 @@ package com.drowsyatmidnight.haint.androidadssdk;
 
 import android.content.Context;
 import android.net.Uri;
+import android.view.View;
+import android.widget.FrameLayout;
 
+import com.drowsyatmidnight.haint.android_fplay_ads_sdk.AdsController;
+import com.drowsyatmidnight.haint.android_fplay_ads_sdk.AdsListener;
+import com.drowsyatmidnight.haint.android_vpaid_sdk.VpaidView;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -25,59 +31,31 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
-import java.io.IOException;
+final class PlayerManager implements AdsMediaSource.MediaSourceFactory, AdsListener.VideoProgress, AdsListener.PlayerStaus {
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
-final class PlayerManager implements AdsMediaSource.MediaSourceFactory {
-
-    private ImaAdsLoader adsLoader;
     private DataSource.Factory manifestDataSourceFactory;
     private DataSource.Factory mediaDataSourceFactory;
 
     public SimpleExoPlayer player;
     public long contentPosition;
-    public String adsResponse;
     private Context context;
     private AdsResponseListener adsResponseListener;
-
-    public void setAdsResponse(String adsResponse) {
-        this.adsResponse = adsResponse;
-    }
+    private FrameLayout adsView;
+    private static final String TAG = PlayerManager.class.getSimpleName();
+    private AdsController adsController;
+    private VpaidView vpaidView;
 
     public PlayerManager(Context context, AdsResponseListener adsResponseListener) {
         this.context = context;
         this.adsResponseListener = adsResponseListener;
-        getAds();
     }
 
-    private void getAds(){
-        String adTag = context.getString(R.string.ad_tag_url);
-        OkHttpClient client = new OkHttpClient();
-        Request requestAds = new Request.Builder()
-                .url(adTag)
-                .build();
-        client.newCall(requestAds).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                adsResponseListener.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                adsResponseListener.onSuccess(response.body().string());
-            }
-        });
+    public PlayerManager(Context context) {
+        this.context = context;
+        this.adsResponseListener = null;
     }
 
-    public void init(PlayerView playerView) {
-        adsLoader = new ImaAdsLoader(context, null, null,
-                adsResponse, ImaAdsLoader.TIMEOUT_UNSET, ImaAdsLoader.TIMEOUT_UNSET, null);
-
+    public void init(PlayerView playerView, String contentUrl, String channelId) {
         manifestDataSourceFactory =
                 new DefaultDataSourceFactory(
                         context, Util.getUserAgent(context, context.getString(R.string.app_name)));
@@ -97,23 +75,56 @@ final class PlayerManager implements AdsMediaSource.MediaSourceFactory {
 
         // Bind the player to the view.
         playerView.setPlayer(player);
-
+        adsView = playerView.getOverlayFrameLayout();
+        adsController = AdsController.getInstance().init(context, this, this);
+        adsController.startAdsLiveTV(306, channelId, "android", "", adsView);
         // This is the MediaSource representing the content media (i.e. not the ad).
-        String contentUrl = context.getString(R.string.content_vod);
         MediaSource contentMediaSource = buildMediaSource(Uri.parse(contentUrl));
-
-        // Compose the content media source into a new AdsMediaSource with both ads and content.
-        MediaSource mediaSourceWithAds =
-                new AdsMediaSource(
-                        contentMediaSource,
-                        /* adMediaSourceFactory= */ this,
-                        adsLoader,
-                        playerView.getOverlayFrameLayout());
-
         // Prepare the player with the source.
         player.seekTo(contentPosition);
-        player.prepare(mediaSourceWithAds);
+        player.prepare(contentMediaSource);
         player.setPlayWhenReady(true);
+    }
+
+    public void init(PlayerView playerView, VpaidView vpaidView, String contentUrl) {
+        manifestDataSourceFactory =
+                new DefaultDataSourceFactory(
+                        context, Util.getUserAgent(context, context.getString(R.string.app_name)));
+        mediaDataSourceFactory =
+                new DefaultDataSourceFactory(
+                        context,
+                        Util.getUserAgent(context, context.getString(R.string.app_name)),
+                        new DefaultBandwidthMeter());
+        // Create a default track selector.
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        // Create a player instance.
+        player = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+
+        // Bind the player to the view.
+        playerView.setPlayer(player);
+        adsView = playerView.getOverlayFrameLayout();
+        this.vpaidView = vpaidView;
+        adsController = AdsController.getInstance().init(context, this, this);
+        adsController.startAdsVod(306, "", "", adsView, vpaidView);
+
+        // This is the MediaSource representing the content media (i.e. not the ad).
+        MediaSource contentMediaSource = buildMediaSource(Uri.parse(contentUrl));
+        // Prepare the player with the source.
+        player.seekTo(contentPosition);
+        player.prepare(contentMediaSource);
+        player.setPlayWhenReady(true);
+        player.addListener(new Player.DefaultEventListener() {
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if (playbackState == Player.STATE_ENDED) {
+                    adsController.onCompleted();
+                }
+            }
+        });
     }
 
     public void reset() {
@@ -129,7 +140,6 @@ final class PlayerManager implements AdsMediaSource.MediaSourceFactory {
             player.release();
             player = null;
         }
-        adsLoader.release();
     }
 
     // AdsMediaSource.MediaSourceFactory implementation.
@@ -165,6 +175,42 @@ final class PlayerManager implements AdsMediaSource.MediaSourceFactory {
                 return new ExtractorMediaSource.Factory(mediaDataSourceFactory).createMediaSource(uri);
             default:
                 throw new IllegalStateException("Unsupported type: " + type);
+        }
+    }
+
+    @Override
+    public long setVideoDuaration() {
+        if (player != null) {
+            return player.getDuration();
+        }
+        return 0;
+    }
+
+    @Override
+    public long setVideoCurrentPosition() {
+        if (player != null) {
+            return player.getCurrentPosition();
+        }
+        return 0;
+    }
+
+    @Override
+    public void hiddenPlayer() {
+        if (player != null) {
+            player.setPlayWhenReady(false);
+            if (vpaidView != null) {
+                vpaidView.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    @Override
+    public void showPlayer() {
+        if (player != null) {
+            player.setPlayWhenReady(true);
+            if (vpaidView != null) {
+                vpaidView.setVisibility(View.GONE);
+            }
         }
     }
 }

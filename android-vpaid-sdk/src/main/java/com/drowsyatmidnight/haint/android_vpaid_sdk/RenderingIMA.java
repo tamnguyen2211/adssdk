@@ -196,7 +196,7 @@ public class RenderingIMA {
                 "adsManager.discardAdBreak();" +
                 "Android.adsIsComplete();" +
                 "}" +
-                "adsSkip.style.display = 'none';" +
+                "adsSkip.style.display = '';" +
                 "}" +
                 "function destroyIma() {" +
                 "adDisplayContainer.destroy();" +
