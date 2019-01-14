@@ -1,4 +1,4 @@
-include ':app', ':android-vpaid-sdk', ':android-firestore-sdk', ':AndroidFplayAdsSdk'
+include ':app', ':android-vpaid-sdk', ':android-firestore-sdk', ':AndroidFplayAdsSdk', ':AndroidBannerSdk'
 gradle.ext.exoplayerRoot = '/Users/haint/Google Drive/Work/ads-sdk/android/ExoPlayer'
 gradle.ext.exoplayerModulePrefix = 'exoplayer-'
 apply from: new File(gradle.ext.exoplayerRoot, 'core_settings.gradle')

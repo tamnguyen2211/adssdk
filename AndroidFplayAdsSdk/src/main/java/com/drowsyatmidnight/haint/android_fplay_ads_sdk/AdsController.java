@@ -1,21 +1,27 @@
 package com.drowsyatmidnight.haint.android_fplay_ads_sdk;
 
 import android.content.Context;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-
+//firestore
 import com.drowsyatmidnight.haint.android_firestore_sdk.AdsLive;
 import com.drowsyatmidnight.haint.android_firestore_sdk.LiveAdsListener;
+//vpaid
+import com.drowsyatmidnight.haint.android_vpaid_sdk.IMAJsListener;
+import com.drowsyatmidnight.haint.android_vpaid_sdk.VmapParser;
 import com.drowsyatmidnight.haint.android_vpaid_sdk.VpaidView;
 import com.drowsyatmidnight.haint.android_vpaid_sdk.VpaidViewListener;
+//gg ima
 import com.google.ads.interactivemedia.v3.api.AdDisplayContainer;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
 import com.google.ads.interactivemedia.v3.api.AdsLoader;
 import com.google.ads.interactivemedia.v3.api.AdsManager;
-import com.google.ads.interactivemedia.v3.api.AdsManagerLoadedEvent;
 import com.google.ads.interactivemedia.v3.api.AdsRequest;
 import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.player.ContentProgressProvider;
@@ -30,8 +36,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsListener.AdsStatus, AdsListener.VideoStatus, VpaidViewListener, VpaidViewListener.StatusListener {
-    private String vastResponse;
+public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsListener.AdsStatus, AdsListener.VideoStatus, VpaidViewListener, VpaidViewListener.StatusListener, AdsListener.SkipButtonStatus {
+    private String vastResponse = "";
     private static AdsController adsController;
     private ImaSdkFactory mSdkFactory;
     private AdsLoader mAdsLoader;
@@ -40,18 +46,21 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
     private boolean mIsAdDisplayed;
     private AdsListener.VideoProgress videoProgress;
     private AdsListener.PlayerStaus playerStaus;
+    private AdsListener.SkipButtonStatus skipButtonStatus;
     private Context context;
     private OkHttpClient client;
     private VpaidView vpaidView;
     private VpaidViewListener vpaidViewListener;
     private AdsLive adsLive;
+    private int skipOffset;
+    private View skipButton;
 
 
     public static AdsController getInstance() {
         return adsController != null ? adsController : new AdsController();
     }
 
-    public AdsController init(Context context, AdsListener.VideoProgress videoProgress, AdsListener.PlayerStaus playerStaus) {
+    public static AdsController init(Context context, AdsListener.VideoProgress videoProgress, AdsListener.PlayerStaus playerStaus) {
         return new AdsController(context, videoProgress, playerStaus);
     }
 
@@ -62,23 +71,25 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
         this.context = context;
         this.videoProgress = videoProgress;
         this.playerStaus = playerStaus;
+        this.skipButtonStatus = this;
         client = new OkHttpClient();
         mSdkFactory = ImaSdkFactory.getInstance();
         mAdsLoader = mSdkFactory.createAdsLoader(context);
         mAdsLoader.addAdErrorListener(this);
-        mAdsLoader.addAdsLoadedListener(new AdsLoader.AdsLoadedListener() {
-            @Override
-            public void onAdsManagerLoaded(AdsManagerLoadedEvent adsManagerLoadedEvent) {
-                mAdsManager = adsManagerLoadedEvent.getAdsManager();
-                mAdsManager.addAdEventListener(AdsController.this);
-                mAdsManager.addAdErrorListener(AdsController.this);
-                mAdsManager.init();
-            }
+        mAdsLoader.addAdsLoadedListener(adsManagerLoadedEvent -> {
+            mAdsManager = adsManagerLoadedEvent.getAdsManager();
+            mAdsManager.addAdEventListener(AdsController.this);
+            mAdsManager.addAdErrorListener(AdsController.this);
+            mAdsManager.init();
         });
         this.vpaidViewListener = this;
+        IMAJsListener.initAndroidJsListener(this);
     }
 
     private void requestAds(String adsUrlOrResponse, boolean isLiveAds) {
+        if (adsUrlOrResponse == null || adsUrlOrResponse == "") {
+            return;
+        }
         AdDisplayContainer adDisplayContainer = mSdkFactory.createAdDisplayContainer();
         adDisplayContainer.setAdContainer(mAdUiContainer);
 
@@ -139,10 +150,30 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
                 setPlayPauseOnAdTouch();
                 playerStaus.hiddenPlayer();
                 break;
+            case STARTED:
+                if (!Utils.isEmpty(vastResponse)) {
+                    skipOffset = VmapParser.getSkipOffSet(vastResponse);
+                    if (skipOffset > 0) {
+                        new CountDownTimer(skipOffset * 1000, 1000) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                skipOffset = 0;
+                                skipButtonStatus.showSkipButton();
+                            }
+                        }.start();
+                    }
+                }
+                break;
             case CONTENT_RESUME_REQUESTED:
                 mIsAdDisplayed = false;
                 removePlayPauseOnAdTouch();
                 playerStaus.showPlayer();
+                skipButtonStatus.hiddenSkipButton();
                 break;
             case ALL_ADS_COMPLETED:
                 if (mAdsManager != null) {
@@ -162,10 +193,12 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
     }
 
     @Override
-    public void startAdsVod(int placement, String contentId, String uuid, ViewGroup mAdUiContainer, VpaidView vpaidView) {
+    public void startAdsVod(String uuid, int placement, String url, ViewGroup mAdUiContainer, VpaidView vpaidView, View skipButton) {
         this.vpaidView = vpaidView;
         this.mAdUiContainer = mAdUiContainer;
-        String adTag = "https://d.adsplay.net/delivery?placement=306&ctid=5acd6f4f5583200884530a55&catid=tv-show&uuid=6f9a9581913dcc4e&ut=2&t=1537845667&cid=5acd6f4f5583200884530a55&verison_app=3.3.1";
+        this.skipButton = skipButton;
+//        String adTag = Utils.buildVodAdsUrl(uuid, placement, url, context);
+        String adTag = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=";
         Request requestAds = new Request.Builder()
                 .url(adTag)
                 .build();
@@ -187,7 +220,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
     }
 
     @Override
-    public void startAdsLiveTV(int placement, String channelId, String deviceNameOnCloudFirestore, String uuid, ViewGroup mAdUiContainer) {
+    public void startAdsLiveTV(String uuid, int placement, String channelId, String deviceNameOnCloudFirestore, ViewGroup mAdUiContainer) {
         this.mAdUiContainer = mAdUiContainer;
         adsLive = AdsLive.getInstance();
         adsLive.init(uuid, placement, deviceNameOnCloudFirestore);
@@ -195,12 +228,12 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
         adsLive.getAdsLiveEvent(new LiveAdsListener() {
             @Override
             public void getAdsSuccess(String s) {
-                requestAds(s,true);
+                requestAds(s, true);
             }
 
             @Override
             public void getAdsFailure(String s) {
-                requestAds("",true);
+                requestAds("", true);
             }
         });
     }
@@ -245,20 +278,18 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
 
     private void setPlayPauseOnAdTouch() {
         mAdUiContainer.setOnTouchListener(
-                new View.OnTouchListener() {
-                    public boolean onTouch(View view, MotionEvent event) {
-                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            if (mAdsManager != null) {
-                                if (mIsAdDisplayed) {
-                                    mAdsManager.pause();
-                                } else {
-                                    mAdsManager.resume();
-                                }
+                (view, event) -> {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        if (mAdsManager != null) {
+                            if (mIsAdDisplayed) {
+                                mAdsManager.pause();
+                            } else {
+                                mAdsManager.resume();
                             }
-                            return true;
-                        } else {
-                            return false;
                         }
+                        return true;
+                    } else {
+                        return false;
                     }
                 }
         );
@@ -275,21 +306,59 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
 
     @Override
     public void adsReady() {
-        playerStaus.hiddenPlayer();
+        if (vpaidView != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                playerStaus.hiddenPlayer();
+                vpaidView.setVisibility(View.VISIBLE);
+            });
+        }
     }
 
     @Override
     public void adsComplete() {
-        playerStaus.showPlayer();
+        if (vpaidView != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                playerStaus.showPlayer();
+                vpaidView.setVisibility(View.GONE);
+            });
+        }
     }
 
     @Override
     public void adsError() {
-        playerStaus.showPlayer();
+        if (vpaidView != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                playerStaus.showPlayer();
+                vpaidView.setVisibility(View.GONE);
+            });
+        }
     }
 
     @Override
     public void adsCanSkip() {
 
+    }
+
+    @Override
+    public void hiddenSkipButton() {
+        if (skipButton != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                skipButton.setVisibility(View.GONE);
+                skipButton.setOnClickListener(null);
+            });
+        }
+    }
+
+    @Override
+    public void showSkipButton() {
+        if (skipButton != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                skipButton.setVisibility(View.VISIBLE);
+                skipButton.setOnClickListener(v -> {
+                    mAdsManager.skip();
+                    mAdsManager.discardAdBreak();
+                });
+            });
+        }
     }
 }

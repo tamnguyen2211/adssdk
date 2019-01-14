@@ -11,8 +11,6 @@ import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
-import java.util.Map;
-
 public class VpaidView extends WebView {
     public VpaidView(Context context) {
         super(context);
@@ -81,16 +79,16 @@ public class VpaidView extends WebView {
             }
         });
         try {
-            int offsetSecond = 0;
-            String vast = null;
-            Map<Integer, String> vastData = VmapParser.getCorrectVastXML(milis, vastResponse);
-            if (vastData.size() == 1) {
-                for (Integer second : vastData.keySet()) {
-                    offsetSecond = second;
-                    vast = vastData.get(second);
-                }
-            }
-                this.loadDataWithBaseURL("http://localhost/", RenderingIMA.getHtmlWithVastContent(width, height, vastResponse, offsetSecond, milis / 1000), "text/html", "utf-8", null);
+//            int offsetSecond = 0;
+//            String vast = null;
+//            Map<Integer, String> vastData = VmapParser.getCorrectVastXML(milis, vastResponse);
+//            if (vastData.size() == 1) {
+//                for (Integer second : vastData.keySet()) {
+//                    offsetSecond = second;
+//                    vast = vastData.get(second);
+//                }
+//            }
+                this.loadDataWithBaseURL("http://localhost/", RenderingIMA.getHtmlWithVastContent(width, height, vastResponse, VmapParser.getSkipOffSet(vastResponse), milis / 1000), "text/html", "utf-8", null);
         } catch (Exception e) {
             Log.d("VpaidParsing", "Debuggggggggggggggg: " + e.getMessage());
             this.loadDataWithBaseURL("http://localhost/", RenderingIMA.getHtmlWithVastContent(width, height, "", 0, milis / 1000), "text/html", "utf-8", null);

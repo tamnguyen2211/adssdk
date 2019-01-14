@@ -2,7 +2,7 @@ package com.drowsyatmidnight.haint.androidadssdk;
 
 import android.content.Context;
 import android.net.Uri;
-import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.drowsyatmidnight.haint.android_fplay_ads_sdk.AdsController;
@@ -76,8 +76,8 @@ final class PlayerManager implements AdsMediaSource.MediaSourceFactory, AdsListe
         // Bind the player to the view.
         playerView.setPlayer(player);
         adsView = playerView.getOverlayFrameLayout();
-        adsController = AdsController.getInstance().init(context, this, this);
-        adsController.startAdsLiveTV(306, channelId, "android", "", adsView);
+        adsController = AdsController.init(context, this, this);
+        adsController.startAdsLiveTV("", 306, "quang-tri", "android", adsView);
         // This is the MediaSource representing the content media (i.e. not the ad).
         MediaSource contentMediaSource = buildMediaSource(Uri.parse(contentUrl));
         // Prepare the player with the source.
@@ -86,7 +86,7 @@ final class PlayerManager implements AdsMediaSource.MediaSourceFactory, AdsListe
         player.setPlayWhenReady(true);
     }
 
-    public void init(PlayerView playerView, VpaidView vpaidView, String contentUrl) {
+    public void init(PlayerView playerView, VpaidView vpaidView, String contentUrl, Button skipButton) {
         manifestDataSourceFactory =
                 new DefaultDataSourceFactory(
                         context, Util.getUserAgent(context, context.getString(R.string.app_name)));
@@ -108,8 +108,8 @@ final class PlayerManager implements AdsMediaSource.MediaSourceFactory, AdsListe
         playerView.setPlayer(player);
         adsView = playerView.getOverlayFrameLayout();
         this.vpaidView = vpaidView;
-        adsController = AdsController.getInstance().init(context, this, this);
-        adsController.startAdsVod(306, "", "", adsView, vpaidView);
+        adsController = AdsController.init(context, this, this);
+        adsController.startAdsVod("", 306, "", adsView, vpaidView, skipButton);
 
         // This is the MediaSource representing the content media (i.e. not the ad).
         MediaSource contentMediaSource = buildMediaSource(Uri.parse(contentUrl));
@@ -198,9 +198,6 @@ final class PlayerManager implements AdsMediaSource.MediaSourceFactory, AdsListe
     public void hiddenPlayer() {
         if (player != null) {
             player.setPlayWhenReady(false);
-            if (vpaidView != null) {
-                vpaidView.setVisibility(View.VISIBLE);
-            }
         }
     }
 
@@ -208,9 +205,6 @@ final class PlayerManager implements AdsMediaSource.MediaSourceFactory, AdsListe
     public void showPlayer() {
         if (player != null) {
             player.setPlayWhenReady(true);
-            if (vpaidView != null) {
-                vpaidView.setVisibility(View.GONE);
-            }
         }
     }
 }

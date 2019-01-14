@@ -24,7 +24,8 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+//    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation 'com.android.support:design:28.0.0'
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-media-compat:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
@@ -37,7 +38,7 @@ dependencies {
     implementation project(':exoplayer-library-ui')
     implementation project(':exoplayer-library-hls')
     implementation project(':exoplayer-extension-okhttp')
-    implementation project(':exoplayer-extension-ima')
+    implementation 'com.google.ads.interactivemedia.v3:interactivemedia:3.9.4'
     implementation project(':exoplayer-library-smoothstreaming')
     implementation 'com.google.firebase:firebase-firestore:17.1.5'
     implementation 'com.google.firebase:firebase-core:16.0.6'
