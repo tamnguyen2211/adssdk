@@ -36,6 +36,7 @@ show ads on vod instream:
 ```
 // you need to init sdk first
 adsController.startAdsVod(String uuid, int placement, String url, ViewGroup mAdUiContainer, VpaidView vpaidView, View skipButton);
+
 // when video content is completed 
 // or user seek to the end of video content call this method
 adsController.onCompleted();
