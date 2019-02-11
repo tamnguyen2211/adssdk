@@ -8,7 +8,7 @@ in player manager:
 ```
 then, override these methods:
 ```
-  @Override
+    @Override
     public long setVideoDuaration() {
         // return duration of video content
     }
