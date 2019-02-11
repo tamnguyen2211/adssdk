@@ -64,7 +64,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
         return new AdsController(context, videoProgress, playerStaus);
     }
 
-    public AdsController() {
+    private AdsController() {
     }
 
     private AdsController(Context context, AdsListener.VideoProgress videoProgress, AdsListener.PlayerStaus playerStaus) {
@@ -140,7 +140,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
                 String message = "AdEvent: " + adData;
 //                Log.i(TAG, message);
                 if (adData.containsKey("errorMessage")) {
-                    if (adData.get("errorMessage").equals("Linear assets were found in the VAST ad response, but none of them matched the video player's capabilities.")) {
+                        if (adData.get("errorMessage").equals("Linear assets were found in the VAST ad response, but none of them matched the video player's capabilities.")) {
                         vpaidViewListener.init();
                     }
                 }
@@ -176,6 +176,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
                 skipButtonStatus.hiddenSkipButton();
                 break;
             case ALL_ADS_COMPLETED:
+                Log.d("Debug vpaid", "onAdEvent: All ads complete");
                 if (mAdsManager != null) {
                     mAdsManager.destroy();
                     mAdsManager = null;
@@ -197,8 +198,8 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
         this.vpaidView = vpaidView;
         this.mAdUiContainer = mAdUiContainer;
         this.skipButton = skipButton;
-//        String adTag = Utils.buildVodAdsUrl(uuid, placement, url, context);
-        String adTag = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=";
+        String adTag = Utils.buildVodAdsUrl(uuid, placement, url, context);
+//        String adTag = "https://vast.mathtag.com/?debug=1&exch=brx&id=asfasf&sid=111666111&cid=5324772&price=12&protocol_version=1&aid=123&adverid=123";
         Request requestAds = new Request.Builder()
                 .url(adTag)
                 .build();

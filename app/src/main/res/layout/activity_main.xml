@@ -34,6 +34,11 @@
             android:layout_weight="1"/>
     </LinearLayout>
 
+    <com.drowsyatmidnight.haint.android_banner_sdk.BannerView
+        android:id="@+id/banner1"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"/>
+
     <FrameLayout
         android:id="@+id/framelayout"
         android:layout_width="match_parent"
@@ -54,5 +59,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </FrameLayout>
+
+    <com.drowsyatmidnight.haint.android_banner_sdk.BannerView
+        android:id="@+id/banner2"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"/>
 
 </LinearLayout>

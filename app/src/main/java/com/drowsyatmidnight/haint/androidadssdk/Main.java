@@ -5,8 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.drowsyatmidnight.haint.android_banner_sdk.BannerController;
+import com.drowsyatmidnight.haint.android_banner_sdk.BannerInfo;
+import com.drowsyatmidnight.haint.android_banner_sdk.BannerView;
 import com.drowsyatmidnight.haint.android_vpaid_sdk.VpaidView;
 import com.google.android.exoplayer2.ui.PlayerView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main extends Activity {
 
@@ -16,6 +22,9 @@ public class Main extends Activity {
     private Button btnVod;
     private Button btnLive1;
     private Button skipButton;
+    private BannerView bannerView1;
+    private BannerView bannerView2;
+    private BannerController bannerController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +38,13 @@ public class Main extends Activity {
         playerManager = new PlayerManager(this);
         vpaidView = findViewById(R.id.vpaidView);
         vpaidView.setVisibility(View.GONE);
+        bannerView1 = findViewById(R.id.banner1);
+        bannerView2 = findViewById(R.id.banner2);
+        bannerController = BannerController.getInstance();
+        List<BannerInfo> bannerInfos = new ArrayList<>();
+        bannerInfos.add(new BannerInfo(bannerView1, 102));
+        bannerInfos.add(new BannerInfo(bannerView2, 202));
+        bannerController.init(bannerInfos, this);
         btnVod.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

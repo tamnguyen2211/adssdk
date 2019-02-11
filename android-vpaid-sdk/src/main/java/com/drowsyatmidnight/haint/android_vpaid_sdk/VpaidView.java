@@ -12,18 +12,24 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
 public class VpaidView extends WebView {
+
+    private Context context;
+
     public VpaidView(Context context) {
         super(context);
+        this.context = context;
         initWebView();
     }
 
     public VpaidView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
         initWebView();
     }
 
     public VpaidView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.context = context;
     }
 
     private void initWebView() {
@@ -66,9 +72,6 @@ public class VpaidView extends WebView {
     }
 
     public void initView(final int width, final int height, int milis, final String vastResponse) {
-        this.getLayoutParams().width = width;
-        this.getLayoutParams().height = height;
-        this.requestLayout();
         this.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
@@ -88,10 +91,10 @@ public class VpaidView extends WebView {
 //                    vast = vastData.get(second);
 //                }
 //            }
-                this.loadDataWithBaseURL("http://localhost/", RenderingIMA.getHtmlWithVastContent(width, height, vastResponse, VmapParser.getSkipOffSet(vastResponse), milis / 1000), "text/html", "utf-8", null);
+                this.loadDataWithBaseURL("http://localhost/", RenderingIMA.getHtmlWithVastContent(width, height, vastResponse, VmapParser.getSkipOffSet(vastResponse), milis / 1000, context), "text/html", "utf-8", null);
         } catch (Exception e) {
             Log.d("VpaidParsing", "Debuggggggggggggggg: " + e.getMessage());
-            this.loadDataWithBaseURL("http://localhost/", RenderingIMA.getHtmlWithVastContent(width, height, "", 0, milis / 1000), "text/html", "utf-8", null);
+            this.loadDataWithBaseURL("http://localhost/", RenderingIMA.getHtmlWithVastContent(width, height, "", 0, milis / 1000, context), "text/html", "utf-8", null);
         }
     }
 }
