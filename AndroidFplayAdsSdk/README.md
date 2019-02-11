@@ -1,7 +1,8 @@
 # AndroidAdsSdk
 **AndroidAdsSdk** is a ads controller.
 ## How to use sdk?
-import all of libs: android-firestore-sdk-release.aar, android-vpaid-sdk-release.aar, AndroidFplayAdsSdk-release.aar
+### import all of libs: android-firestore-sdk-release.aar, android-vpaid-sdk-release.aar, AndroidFplayAdsSdk-release.aar
+in player manager:
 ```
   implements AdsListener.VideoProgress, AdsListener.PlayerStaus
 ```
