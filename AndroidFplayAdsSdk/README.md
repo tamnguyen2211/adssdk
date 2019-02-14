@@ -59,8 +59,7 @@ show ads on live tv:
  * @param placement: android_app: 306, android_tv:308
  * @param channelId: vtv6-hd
  * @param deviceNameOnCloudFirestore: android_app: android, android_tv: smarttv-sony-android
- * @param vpaidView
- * @param skipButton
+ * @param mAdUiContainer
  */
 adsController.startAdsLiveTV(String uuid, int placement, String channelId, String deviceNameOnCloudFirestore, ViewGroup mAdUiContainer);
 ```
