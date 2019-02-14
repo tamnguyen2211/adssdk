@@ -26,16 +26,19 @@ public class Utils {
 
     public static String buildVodAdsUrl(String uuid, int placement, String url, Context context) {
         String ua;
+        String urlEncode;
         try {
             ua = nullToEmpty(URLEncoder.encode(getUserAgent(context), "UTF-8"));
+            urlEncode = nullToEmpty(URLEncoder.encode(url, "UTF-8"));
         } catch (Exception e) {
             ua = "";
+            urlEncode = "";
         }
-        return "https://d.adsplay.net/delivery?uid=" + nullToEmpty(uuid) +
+        return "https://d.adsplay.xyz/delivery?uid=" + nullToEmpty(uuid) +
                 "&pid=" + nullToEmpty(placement) +
                 "&ip=" + nullToEmpty(getIPAddress(true)) +
                 "&ua=" + ua +
-                "&purl=" + nullToEmpty(url) +
+                "&purl=" + urlEncode +
                 "&cb" + System.currentTimeMillis();
     }
 
