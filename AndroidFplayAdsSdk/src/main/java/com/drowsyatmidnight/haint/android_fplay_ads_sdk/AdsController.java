@@ -140,7 +140,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
                 String message = "AdEvent: " + adData;
 //                Log.i(TAG, message);
                 if (adData.containsKey("errorMessage")) {
-                        if (adData.get("errorMessage").equals("Linear assets were found in the VAST ad response, but none of them matched the video player's capabilities.")) {
+                    if (adData.get("errorMessage").equals("Linear assets were found in the VAST ad response, but none of them matched the video player's capabilities.")) {
                         vpaidViewListener.init();
                     }
                 }
@@ -229,7 +229,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
         adsLive.getAdsLiveEvent(new LiveAdsListener() {
             @Override
             public void getAdsSuccess(String s) {
-                requestAds(s, true);
+                requestAds(s + "&ver=1.0.0", true);
             }
 
             @Override

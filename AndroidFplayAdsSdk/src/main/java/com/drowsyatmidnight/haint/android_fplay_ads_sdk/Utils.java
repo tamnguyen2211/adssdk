@@ -39,7 +39,8 @@ public class Utils {
                 "&ip=" + nullToEmpty(getIPAddress(true)) +
                 "&ua=" + ua +
                 "&purl=" + urlEncode +
-                "&cb" + System.currentTimeMillis();
+                "&cb=" + System.currentTimeMillis() +
+                "&ver=1.0.0";
     }
 
     public static String getIPAddress(boolean useIPv4) {
