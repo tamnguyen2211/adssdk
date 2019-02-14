@@ -35,6 +35,15 @@ AdsController adsController = AdsController.init(Context, AdsListener.VideoProgr
 show ads on vod instream:
 ```
 // you need to init sdk first
+/**
+ *
+ * @param uuid: 897fcb2a27d84ca0abd0571889e8e39b
+ * @param placement: android_app: 306, android_tv:308
+ * @param url: http://fptplay.net/xem-video/cham-vao-tim-em-touch-your-heart-5c4d6d0bfa9c5e094ea7ac97.html#tap-1
+ * @param mAdUiContainer
+ * @param vpaidView
+ * @param skipButton
+ */
 adsController.startAdsVod(String uuid, int placement, String url, ViewGroup mAdUiContainer, VpaidView vpaidView, View skipButton);
 
 // when video content is completed 
@@ -44,6 +53,14 @@ adsController.onCompleted();
 show ads on live tv:
 ```
 // you need to init sdk first
+/**
+ *
+ * @param uuid:897fcb2a27d84ca0abd0571889e8e39b
+ * @param placement: android_app: 306, android_tv:308
+ * @param channelId: vtv6-hd
+ * @param deviceNameOnCloudFirestore: android_app: android, android_tv: smarttv-sony-android
+ * @param mAdUiContainer
+ */
 adsController.startAdsLiveTV(String uuid, int placement, String channelId, String deviceNameOnCloudFirestore, ViewGroup mAdUiContainer);
 ```
 stop ads:
