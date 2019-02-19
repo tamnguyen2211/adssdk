@@ -8,15 +8,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-//firestore
+import android.widget.Button;
+
 import com.drowsyatmidnight.haint.android_firestore_sdk.AdsLive;
 import com.drowsyatmidnight.haint.android_firestore_sdk.LiveAdsListener;
-//vpaid
 import com.drowsyatmidnight.haint.android_vpaid_sdk.IMAJsListener;
 import com.drowsyatmidnight.haint.android_vpaid_sdk.VmapParser;
 import com.drowsyatmidnight.haint.android_vpaid_sdk.VpaidView;
 import com.drowsyatmidnight.haint.android_vpaid_sdk.VpaidViewListener;
-//gg ima
 import com.google.ads.interactivemedia.v3.api.AdDisplayContainer;
 import com.google.ads.interactivemedia.v3.api.AdErrorEvent;
 import com.google.ads.interactivemedia.v3.api.AdEvent;
@@ -36,6 +35,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+//firestore
+//vpaid
+//gg ima
+
 public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdErrorListener, AdsListener.AdsStatus, AdsListener.VideoStatus, VpaidViewListener, VpaidViewListener.StatusListener, AdsListener.SkipButtonStatus {
     private String vastResponse = "";
     private static AdsController adsController;
@@ -53,7 +56,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
     private VpaidViewListener vpaidViewListener;
     private AdsLive adsLive;
     private int skipOffset;
-    private View skipButton;
+    private Button skipButton;
 
 
     public static AdsController getInstance() {
@@ -106,6 +109,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
         } else {
             request.setAdsResponse(adsUrlOrResponse);
         }
+        Log.i(AdsController.class.getSimpleName(), "requestAds: " + adsUrlOrResponse);
         request.setAdDisplayContainer(adDisplayContainer);
         request.setContentProgressProvider(new ContentProgressProvider() {
             @Override
@@ -130,7 +134,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
 
     @Override
     public void onAdEvent(AdEvent adEvent) {
-        Log.i(Utils.TAG + this.getClass().getSimpleName(), "Event: " + adEvent.getType());
+//        Log.i(Utils.TAG + this.getClass().getSimpleName(), "Event: " + adEvent.getType());
         switch (adEvent.getType()) {
             case LOADED:
                 mAdsManager.start();
@@ -153,19 +157,28 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
             case STARTED:
                 if (!Utils.isEmpty(vastResponse)) {
                     skipOffset = VmapParser.getSkipOffSet(vastResponse);
-                    if (skipOffset > 0) {
-                        new CountDownTimer(skipOffset * 1000, 1000) {
-                            @Override
-                            public void onTick(long millisUntilFinished) {
+                    Log.i(AdsController.class.getSimpleName(), "skipOffset: " + skipOffset);
+                    if (adEvent.getAd().isSkippable() && skipOffset == 0) {
+                        mAdsManager.focusSkipButton();
+                    } else {
+                        if (skipOffset > 0) {
+                            new CountDownTimer(skipOffset * 1000, 1000) {
+                                @Override
+                                public void onTick(long millisUntilFinished) {
+                                    --skipOffset;
+                                    Log.i(AdsController.class.getSimpleName(), "skipOffset: " + skipOffset);
+                                    skipButtonStatus.showSkipButton(skipOffset);
+                                }
 
-                            }
-
-                            @Override
-                            public void onFinish() {
-                                skipOffset = 0;
-                                skipButtonStatus.showSkipButton();
-                            }
-                        }.start();
+                                @Override
+                                public void onFinish() {
+                                    skipOffset = 0;
+                                    Log.i(AdsController.class.getSimpleName(), "skipOffset: onFinish()");
+                                    skipButtonStatus.addActionSkipbutton();
+                                    skipButton.requestFocus();
+                                }
+                            }.start();
+                        }
                     }
                 }
                 break;
@@ -197,9 +210,10 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
     public void startAdsVod(String uuid, int placement, String url, ViewGroup mAdUiContainer, VpaidView vpaidView, View skipButton) {
         this.vpaidView = vpaidView;
         this.mAdUiContainer = mAdUiContainer;
-        this.skipButton = skipButton;
+        this.skipButton = (Button) skipButton;
         String adTag = Utils.buildVodAdsUrl(uuid, placement, url, context);
-//        String adTag = "https://vast.mathtag.com/?debug=1&exch=brx&id=asfasf&sid=111666111&cid=5324772&price=12&protocol_version=1&aid=123&adverid=123";
+        Log.i("UrlDelivery: ", adTag);
+//        String adTag = "https://d7.adsplay.xyz/delivery?uid=4909bd7e4b684636&pid=308&ip=192.168.1.163&ua=Mozilla%2F5.0+%28Linux%3B+Android+9%3B+FPT+ATV+Play+Box+Build%2FNHG47L%3B+wv%29+AppleWebKit%2F537.36+%28KHTML%2C+like+Gecko%29+Version%2F4.0+Chrome%2F71.0.3578.99+Mobile+Safari%2F537.36&purl=http%3A%2F%2Ffptplay.net%2Fxem-video%2Fhoa-vuong-pha-hieu-chi-chien-the-king-of-blaze-5bfaa031fa9c5e0a1e269a4b.html%231&cb=1550476969020&ver=1.0.0";
         Request requestAds = new Request.Builder()
                 .url(adTag)
                 .build();
@@ -207,7 +221,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
             @Override
             public void onFailure(Call call, IOException e) {
                 requestAds(vastResponse, false);
-                Log.e("getAdsLoader " + AdsController.class.getSimpleName(), "getAds: ", e);
+                Log.e("getAdsLoader " + AdsController.class.getSimpleName(), "url: " + adTag + "getAds: ", e);
             }
 
             @Override
@@ -230,6 +244,7 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
             @Override
             public void getAdsSuccess(String s) {
                 requestAds(s + "&ver=1.0.0", true);
+                Log.i(AdsController.class.getSimpleName(), "getAdsSuccess: " + s + "&ver=1.0.0");
             }
 
             @Override
@@ -248,6 +263,18 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
         if (adsLive != null) {
             adsLive.detachAdsLive();
         }
+    }
+
+    @Override
+    public void destroyAds() {
+        if (mAdsManager != null) {
+            mAdsManager.discardAdBreak();
+            mAdsManager.destroy();
+        }
+        if (adsLive != null) {
+            adsLive.detachAdsLive();
+        }
+        adsController = null;
     }
 
     @Override
@@ -345,16 +372,30 @@ public class AdsController implements AdEvent.AdEventListener, AdErrorEvent.AdEr
         if (skipButton != null) {
             new Handler(Looper.getMainLooper()).post(() -> {
                 skipButton.setVisibility(View.GONE);
+                Log.i(AdsController.class.getSimpleName(), "showSkipButton(): hide skip");
                 skipButton.setOnClickListener(null);
             });
         }
     }
 
     @Override
-    public void showSkipButton() {
+    public void showSkipButton(int skipOffset) {
         if (skipButton != null) {
             new Handler(Looper.getMainLooper()).post(() -> {
                 skipButton.setVisibility(View.VISIBLE);
+                Log.i(AdsController.class.getSimpleName(), "showSkipButton(): show skip");
+                skipButton.setText("You can skip this ad in: " + skipOffset);
+            });
+        }
+    }
+
+    @Override
+    public void addActionSkipbutton() {
+        if (skipButton != null) {
+            skipButton.requestFocus();
+            skipButton.setText("Skip Ad");
+            Log.i(AdsController.class.getSimpleName(), "showSkipButton(): request focus");
+            new Handler(Looper.getMainLooper()).post(() -> {
                 skipButton.setOnClickListener(v -> {
                     mAdsManager.skip();
                     mAdsManager.discardAdBreak();

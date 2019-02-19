@@ -34,7 +34,7 @@ public class Utils {
             ua = "";
             urlEncode = "";
         }
-        return "https://d.adsplay.xyz/delivery?uid=" + nullToEmpty(uuid) +
+        return "https://d7.adsplay.xyz/delivery?uid=" + nullToEmpty(uuid) +
                 "&pid=" + nullToEmpty(placement) +
                 "&ip=" + nullToEmpty(getIPAddress(true)) +
                 "&ua=" + ua +

@@ -19,7 +19,8 @@ public interface AdsListener {
 
     interface SkipButtonStatus{
         void hiddenSkipButton();
-        void showSkipButton();
+        void showSkipButton(int skipOffset);
+        void addActionSkipbutton();
     }
 
     interface VideoStatus{
@@ -34,5 +35,6 @@ public interface AdsListener {
         void startAdsVod(String uuid, int placement, String url, ViewGroup mAdUiContainer, VpaidView vpaidView, View skipButton);
         void startAdsLiveTV(String uuid, int placement, String channelId, String deviceNameOnCloudFirestore, ViewGroup mAdUiContainer);
         void stopAds();
+        void destroyAds();
     }
 }
